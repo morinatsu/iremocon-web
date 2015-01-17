@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+iremocon.json
+iremocon.yaml
