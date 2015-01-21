@@ -22,16 +22,16 @@ class IRemocon(object):
         """
         Make a New Instance
         """
-        def invert_dict(src_dict, inverted_dict, key_str):
+        def invert_dict(src_dict, inverted_dict, key_list):
             """ make invert dict from dict """
             for k in src_dict:
-                new_key = ''.join([key_str, '[', k, ']'])
-                logger.debug(repr(type(src_dict[k])))
+                new_list = key_list[:]
+                new_list.append(k)
                 if not (isinstance(src_dict[k], dict)):
-                    logger.debug(': '.join([str(src_dict[k]), k]))
-                    inverted_dict[str(src_dict[k])] = new_key
+                    inverted_dict[str(src_dict[k])] = new_list
                 else:
-                    inverted_dict = invert_dict(src_dict[k], inverted_dict, new_key)
+                    inverted_dict = invert_dict(src_dict[k], inverted_dict,
+                        new_list)
             logger.debug(str(inverted_dict))
             return inverted_dict
 
@@ -46,7 +46,7 @@ class IRemocon(object):
         f = open(self._remocon_filename, encoding='utf-8')
         self.code = json.load(f)
         f.close()
-        self.inverted_code = invert_dict(self.code, {}, '')
+        self.inverted_code = invert_dict(self.code, {}, [])
 
     def SendCommand(self, message):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
