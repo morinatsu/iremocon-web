@@ -1,0 +1,20 @@
+<!doctype html>
+<title>iRemoconWiFi -- 番町梅屋敷</title>
+<link rel=stylesheet type="text/css" href="static/iremocon.css" />
+<h1>iRemoconWiFi -- 番町梅屋敷</h1>
+<div>
+<h2>Information from Sensors</h2>
+<p>
+{% for sensor in sensors_info %}
+    {{ sensor }}<br />
+{% endfor %}
+</p>
+</div>
+<div>
+<h2>List of Timers</h2>
+<p>
+{% for timer in  list_timers %}
+{{ timer }}<br />
+{% endfor %}
+</p></div>
+<div class="version"><p>{{ firmware_version }}</p></div>

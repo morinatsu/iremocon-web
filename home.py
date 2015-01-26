@@ -5,8 +5,16 @@ Display Info of Sencers in i-remocon
 """
 
 import datetime
-from flask import Flask
+from logging import getLogger, StreamHandler, DEBUG, INFO
+from flask import Flask, render_template
 from iremocon import IRemocon
+
+
+logger = getLogger(__name__)
+handler = StreamHandler()
+handler.setLevel(INFO)
+logger.setLevel(INFO)
+logger.addHandler(handler)
 
 app = Flask(__name__)
 
@@ -18,8 +26,7 @@ def display_sensors_info():
     remocon = IRemocon('iremocon.yaml')
     # send command
     answer = remocon.SendCommand(b'*se\r\n').decode('ascii')
-    div.append(''.join(['Recieved: ', answer]))
-    div.append('')
+    logger.info(''.join(['Recieved: ', answer]))
     # parse answer
     if answer.startswith('se;ok;'):
         illuminance = float(answer.rstrip('\r\n').split(';')[2])
@@ -30,8 +37,7 @@ def display_sensors_info():
         div.append('temperature: {temper:.1f}C'.format(temper=temperature))
     else:
         div.append('Error: cannot recieve sensors info.')
-    div.append('')
-    return '<br />'.join(div)
+    return div
 
 def list_timers():
     """
@@ -45,7 +51,7 @@ def list_timers():
     remocon = IRemocon('iremocon.yaml')
     # send command
     answer = remocon.SendCommand(b'*tl\r\n').decode('ascii')
-    div.append(''.join(['Recieved: ', answer]))
+    logger.info(''.join(['Recieved: ', answer]))
     # parse answer
     if answer.startswith('tl;ok;'):
         head = answer.rstrip('\r\n').split(';')[0:2]
@@ -60,16 +66,25 @@ def list_timers():
         div.append('no timers has set.')
     else:
         div.append('Error: cannot recieve timers list.')
-    div.append('')
-    return '<br />'.join(div)
+    return div
+
+def display_firmware_version():
+    """
+    Display Firmware Version of iRemocon
+    """
+    div =[]
+    remocon = IRemocon('iremocon.yaml')
+    # send command
+    answer = remocon.SendCommand(b'*vr\r\n').decode('ascii')
+    div.append(''.join(['Firmware Version: ', answer]))
+    return '\n'.join(div)
 
 @app.route('/')
 def home():
-    body = []
 
-    body.append(display_sensors_info())
-    body.append(list_timers())
-    return '<br />'.join(body)
+    return render_template('iremocon.html', sensors_info = display_sensors_info(),
+            list_timers = list_timers(),
+            firmware_version = display_firmware_version())
 
 if __name__ == '__main__':
     app.run(debug=True)
