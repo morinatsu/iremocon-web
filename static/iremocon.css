@@ -6,3 +6,24 @@ h1 {
 div.version {
     float: right;
 }
+div.sensors_info th {
+    text-align: right;
+}
+div.sensors_info td {
+    text-align: right;
+}
+div.sensors_info h2 {
+    color: #444444;
+    background-color: #ccccff;
+}
+div.timers_list h2 {
+    color: #444444;
+    background-color: #ccccff;
+}
+div.timers_list tr {
+    color: #222222;
+    background-color: #88ddff;
+}
+div.timers_list tbody td.seq {
+    text-align: right;
+}

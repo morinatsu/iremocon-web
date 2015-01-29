@@ -2,19 +2,26 @@
 <title>iRemoconWiFi -- 番町梅屋敷</title>
 <link rel=stylesheet type="text/css" href="static/iremocon.css" />
 <h1>iRemoconWiFi -- 番町梅屋敷</h1>
-<div>
-<h2>Information from Sensors</h2>
-<p>
-{% for sensor in sensors_info %}
-    {{ sensor }}<br />
-{% endfor %}
-</p>
+<div class="sensors_info">
+    <h2>Information from Sensors</h2>
+    <table>
+        <tbody>
+            <tr><th>illuminance:</th><td>{{ sensors_info['illuminance'] }}</td></tr>
+            <tr><th>humidity:</th><td>{{ sensors_info['humidity'] }}</td></tr>
+            <tr><th>temperature:</th><td>{{ sensors_info['temperature'] }}</td></tr>
+        </tbody>
+    </table>
 </div>
-<div>
-<h2>List of Timers</h2>
-<p>
-{% for timer in  list_timers %}
-{{ timer }}<br />
-{% endfor %}
-</p></div>
+<div class="timers_list">
+    <h2>List of Timers</h2>
+    <table>
+        <thead>
+            <tr><th>Seq</th><th>Remocon-code</th><th>time</th></tr>
+        </thead>
+        <tbody>{% for timer in timers[0] %}
+            <tr><td class="seq">{{ timer['seq'] }}</td><td>{{ timer['code'] }}</td><td>{{ timer['time'] }}</td></tr>
+        {% endfor %}</tbody>
+    </table>
+    <p>{{ timers[1] }}</p>
+</div>
 <div class="version"><p>{{ firmware_version }}</p></div>

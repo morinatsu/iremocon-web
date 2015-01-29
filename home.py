@@ -22,22 +22,22 @@ def display_sensors_info():
     """
     Display Information of iRemocon Built-In Sensors
     """
-    div =[]
+    sensors_info = {}
     remocon = IRemocon('iremocon.yaml')
     # send command
-    answer = remocon.SendCommand(b'*se\r\n').decode('ascii')
+    answer = remocon.SendCommand(b'*se\r\n').decode('ascii').rstrip('\r\n')
     logger.info(''.join(['Recieved: ', answer]))
     # parse answer
     if answer.startswith('se;ok;'):
-        illuminance = float(answer.rstrip('\r\n').split(';')[2])
-        humidity = float(answer.rstrip('\r\n').split(';')[3])
-        temperature = float(answer.rstrip('\r\n').split(';')[4])
-        div.append('illuminance: {illum:.0f}lx'.format(illum=illuminance))
-        div.append('humidity: {humidity:.0f}%'.format(humidity=humidity))
-        div.append('temperature: {temper:.1f}C'.format(temper=temperature))
+        sensors_info['illuminance'] = \
+            '{illum:.0f}lx'.format(illum=float(answer.split(';')[2]))
+        sensors_info['humidity'] = \
+            '{humid:.0f}%'.format(humid=float(answer.split(';')[3]))
+        sensors_info['temperature'] = \
+            '{temper:.1f}C'.format(temper=float(answer.split(';')[4]))
     else:
-        div.append('Error: cannot recieve sensors info.')
-    return div
+        sensors_info['alt_msg']= 'Error: cannot recieve sensors info.'
+    return sensors_info
 
 def list_timers():
     """
@@ -47,26 +47,29 @@ def list_timers():
         date_time = datetime.datetime(1970, 1, 1, 9, 0, 0) + \
             datetime.timedelta(seconds=int(seconds))
         return date_time.strftime('%Y/%m/%d %H:%M:%S')
-    div = []
+    timers = []
+    alt_msg = ''
     remocon = IRemocon('iremocon.yaml')
     # send command
-    answer = remocon.SendCommand(b'*tl\r\n').decode('ascii')
+    answer = remocon.SendCommand(b'*tl\r\n').decode('ascii').rstrip('\r\n')
     logger.info(''.join(['Recieved: ', answer]))
     # parse answer
     if answer.startswith('tl;ok;'):
-        head = answer.rstrip('\r\n').split(';')[0:2]
-        body = answer.rstrip('\r\n').split(';')[3:]
+        head = answer.split(';')[0:2]
+        body = answer.split(';')[3:]
         while len(body) > 0:
-            seq = body.pop(0)
-            code = repr([s for s in remocon.inverted_code[body.pop(0)]])
-            time = reparse_time(body.pop(0))
+            timer = {}
+            timer['seq'] = body.pop(0)
+            timer['code'] = str(remocon.inverted_code[body.pop(0)])
+            timer['time'] = reparse_time(body.pop(0))
             repeat = body.pop(0)
-            div.append('Seq: {seq}, Code: {code}, Time: {time}'.format(seq=seq, code=code, time=time))
+            timers.append(timer)
     elif answer.startswith('tl;err;001'):
-        div.append('no timers has set.')
+        alt_msg = 'no timers has set.'
     else:
-        div.append('Error: cannot recieve timers list.')
-    return div
+        alt_msg = 'Error: cannot recieve timers list.'
+    logger.info(repr(timers))
+    return (timers, alt_msg)
 
 def display_firmware_version():
     """
@@ -82,9 +85,9 @@ def display_firmware_version():
 @app.route('/')
 def home():
 
-    return render_template('iremocon.html', sensors_info = display_sensors_info(),
-            list_timers = list_timers(),
-            firmware_version = display_firmware_version())
+    return render_template('iremocon.html', sensors_info=display_sensors_info(),
+            timers=list_timers(),
+            firmware_version=display_firmware_version())
 
 if __name__ == '__main__':
     app.run(debug=True)
