@@ -1,14 +1,20 @@
 <!doctype html>
+<html>
+<head>
 <title>iRemoconWiFi -- 番町梅屋敷</title>
 <link rel=stylesheet type="text/css" href="static/iremocon.css" />
+<script type="text/javascript" src="static/jquery-2.1.3.min.js"></script>
+<script type="text/javascript" src="static/auto_update.js"></script>
+</head>
+<body>
 <h1>iRemoconWiFi -- 番町梅屋敷</h1>
 <div class="sensors_info">
     <h2>Information from Sensors</h2>
     <table>
         <tbody>
-            <tr><th>illuminance:</th><td>{{ sensors_info['illuminance'] }}</td></tr>
-            <tr><th>humidity:</th><td>{{ sensors_info['humidity'] }}</td></tr>
-            <tr><th>temperature:</th><td>{{ sensors_info['temperature'] }}</td></tr>
+            <tr><th>illuminance:</th><td id="illuminance">{{ sensors_info['illuminance'] }}</td></tr>
+            <tr><th>humidity:</th><td id="humidity">{{ sensors_info['humidity'] }}</td></tr>
+            <tr><th>temperature:</th><td id="temperature">{{ sensors_info['temperature'] }}</td></tr>
         </tbody>
     </table>
 </div>
@@ -25,3 +31,4 @@
     <p>{{ timers[1] }}</p>
 </div>
 <div class="version"><p>{{ firmware_version }}</p></div>
+</body>

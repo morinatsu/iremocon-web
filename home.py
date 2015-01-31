@@ -5,6 +5,7 @@ Display Info of Sencers in i-remocon
 """
 
 import datetime
+import json
 from logging import getLogger, StreamHandler, DEBUG, INFO
 from flask import Flask, render_template
 from iremocon import IRemocon
@@ -81,6 +82,14 @@ def display_firmware_version():
     answer = remocon.SendCommand(b'*vr\r\n').decode('ascii')
     div.append(''.join(['Firmware Version: ', answer]))
     return '\n'.join(div)
+
+@app.route('/api/auto_update')
+def auto_update():
+    """
+    api for autoupdate info on home
+    """
+    sensors_info = display_sensors_info()
+    return json.dumps(sensors_info)
 
 @app.route('/')
 def home():
