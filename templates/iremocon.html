@@ -22,10 +22,20 @@
     <h2>List of Timers</h2>
     <table>
         <thead>
-            <tr><th>Seq</th><th>Remocon-code</th><th>time</th></tr>
+            <tr><th>Seq</th><th>Remocon-code</th><th>time</th><th>cancel</th></tr>
         </thead>
         <tbody>{% for timer in timers[0] %}
-            <tr><td class="seq">{{ timer['seq'] }}</td><td>{{ timer['code'] }}</td><td>{{ timer['time'] }}</td></tr>
+            <form method="POST" action="api/cancel_timer">
+                <tr>
+                    <td class="seq">{{ timer['seq'] }}</td>
+                    <td>{{ timer['code'] }}</td>
+                    <td>{{ timer['time'] }}</td>
+                    <td>
+                        <input type="hidden" name="timer_number" value="{{ timer['seq'] }}">
+                        <input type="submit" name="cancel_timer" value="Cancel">
+                    </td>
+                </tr>
+            </form>
         {% endfor %}</tbody>
     </table>
     <p>{{ timers[1] }}</p>

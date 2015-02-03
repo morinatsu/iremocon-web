@@ -7,7 +7,7 @@ Display Info of Sencers in i-remocon
 import datetime
 import json
 from logging import getLogger, StreamHandler, DEBUG, INFO
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, request
 from iremocon import IRemocon
 
 
@@ -91,9 +91,25 @@ def auto_update():
     sensors_info = display_sensors_info()
     return json.dumps(sensors_info)
 
+@app.route('/api/cancel_timer', methods=['POST'])
+def cancel_timer():
+    """
+    api for cancel a timer
+    """
+    timer_number = request.form['timer_number']
+    if not (timer_number.isdecimal()):
+        logger.info('Invalid request. timer_number:', timer_number)
+        redirect('/')
+    remocon = IRemocon('iremocon.yaml')
+    # send command
+    command = b''.join([b'*td;', timer_number.encode('ascii'), b'\r\n'])
+    answer = remocon.SendCommand(command).decode('ascii').rstrip('\r\n')
+    logger.info(''.join(['Recieved: ', answer]))
+    # redirect to home, if success or not.
+    return redirect('/')
+
 @app.route('/')
 def home():
-
     return render_template('iremocon.html', sensors_info=display_sensors_info(),
             timers=list_timers(),
             firmware_version=display_firmware_version())
