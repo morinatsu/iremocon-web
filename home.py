@@ -83,6 +83,31 @@ def display_firmware_version():
     div.append(''.join(['Firmware Version: ', answer]))
     return '\n'.join(div)
 
+def make_datetime_list():
+    """
+    make lists of available dates & times
+    """
+    today = datetime.date.today()
+    date_list = []
+    for d in range(0, 30):
+        date_list.append((today +
+            datetime.timedelta(days=d)).strftime('%Y/%m/%d'))
+    hours_list = ['{:02d}'.format(h) for h in range(0, 24)]
+    minutes_list = ['{:02d}'.format(m) for m in range(0, 60, 5)]
+    return date_list, hours_list, minutes_list
+
+def list_buttons():
+    """
+    make list of registered button
+    """
+    remocon = IRemocon('iremocon.yaml')
+    buttons_list = []
+    for b in remocon.inverted_code.items():
+        code, button = b
+        buttons_list.append(dict(code=code, button=repr(button)))
+    logger.debug(', '.join([repr(s) for s in buttons_list]))
+    return sorted(buttons_list, key=lambda k: k['button'])
+
 @app.route('/api/auto_update')
 def auto_update():
     """
@@ -108,11 +133,41 @@ def cancel_timer():
     # redirect to home, if success or not.
     return redirect('/')
 
+@app.route('/api/add_timer', methods=['POST'])
+def add_timer():
+    """
+    api for add a timer
+    """
+    timer_number = request.form['Button']
+    date = request.form['date']
+    hour = request.form['hour']
+    minute = request.form['minute']
+    logger.info('timer_number: {}'.format(timer_number))
+    dt = '{} {}:{}:00'.format(date, hour, minute)
+    logger.info('datetime: {}'.format(dt))
+    # make command_string
+    alarm_time = datetime.datetime.strptime(dt, '%Y/%m/%d %H:%M:%S')
+    t = alarm_time - datetime.datetime(1970, 1, 1, 9, 0, 0)
+    command_string = \
+        '*tm;{REMOCON_CODE};{seconds:.0f};0\r\n'.format(
+            REMOCON_CODE=timer_number, seconds=t.total_seconds())
+    # send command and display result
+    remocon = IRemocon('iremocon.yaml')
+    answer = remocon.SendCommand(command_string.encode('ascii'))
+    logger.info(''.join(['Recieved: ', answer.decode('ascii')]))
+    # redirect to home, if success or not.
+    return redirect('/')
+
 @app.route('/')
 def home():
+    date_list, hours_list, minutes_list = make_datetime_list()
     return render_template('iremocon.html', sensors_info=display_sensors_info(),
             timers=list_timers(),
+            date_list=date_list,
+            hours_list=hours_list,
+            minutes_list=minutes_list,
+            buttons_list=list_buttons(),
             firmware_version=display_firmware_version())
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)

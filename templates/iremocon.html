@@ -39,6 +39,20 @@
         {% endfor %}</tbody>
     </table>
     <p>{{ timers[1] }}</p>
+    <form id="timer_form" method="POST" action="api/add_timer">
+        <p>Date: <select name="date">{% for date_choice in date_list %}
+            <option value="{{ date_choice }}">{{ date_choice }}</option>
+        {% endfor %}</select></p>
+        <p>Time: <select name="hour">{% for hours_choice in hours_list %}
+            <option value="{{ hours_choice }}">{{ hours_choice }}</option>
+        {% endfor %}</select>:<select name="minute">{% for minutes_choice in minutes_list %}
+            <option value="{{ minutes_choice }}">{{ minutes_choice }}</option>
+        {% endfor %}</select></p>
+        <p>Button: <select name="Button">{% for button_choice in buttons_list %}
+            <option value="{{ button_choice['code'] }}">{{ button_choice['button'] }}</option>
+        {% endfor %}</select></p>
+        <input type="submit" name="add_timer" value="Add">
+    </form>
 </div>
-<div class="version"><p>{{ firmware_version }}</p></div>
+<footer><div class="version"><p>{{ firmware_version }}</p></div></footer>
 </body>
