@@ -6,12 +6,14 @@ import socket
 import json
 import configparser
 from logging import getLogger, StreamHandler, INFO, DEBUG
+from threading import RLock
 
 logger = getLogger(__name__)
 handler = StreamHandler()
 handler.setLevel(INFO)
 logger.setLevel(INFO)
 logger.addHandler(handler)
+lock = RLock()
 
 class IRemocon(object):
     """
@@ -49,16 +51,17 @@ class IRemocon(object):
         self.inverted_code = invert_dict(self.code, {}, [])
 
     def SendCommand(self, message):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(60)
-        s.connect((self._host, self._port))
-        s.sendall(message)
+        with lock:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(60)
+            s.connect((self._host, self._port))
+            s.sendall(message)
 
-        chunks = []
-        while True:
-            chunk = s.recv(1024)
-            chunks.append(chunk)
-            if chunk.endswith(b'\r\n'):
-                break
-        s.close()
-        return b''.join(chunks)
+            chunks = []
+            while True:
+                chunk = s.recv(1024)
+                chunks.append(chunk)
+                if chunk.endswith(b'\r\n'):
+                    break
+            s.close()
+            return b''.join(chunks)
